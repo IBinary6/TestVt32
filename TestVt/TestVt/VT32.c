@@ -163,3 +163,70 @@ NTSTATUS NTAPI TrunOffVmxOff()
     KdPrint(("关闭VT成功,已成功关闭\r\n"));
     return STATUS_SUCCESS;
 }
+
+
+NTSTATUS NTAPI VmcsSupport()
+{
+    EFLAGS flags;
+    g_CpuGlobalValueInfo.pVmxVmcsRegion = NULL;
+    g_CpuGlobalValueInfo.pVmxVmcsRegion = ExAllocatePoolWithTag(NonPagedPool, 0x1000, 'XMV');
+    if (NULL == g_CpuGlobalValueInfo.pVmxVmcsRegion)
+    {
+        KdPrint(("VMCS虚拟地址空间申请失败\r\n"));
+        return STATUS_UNSUCCESSFUL;
+    }
+    //转化物理地址
+    g_CpuGlobalValueInfo.pVmxVmcsRegionPA = MmGetPhysicalAddress(g_CpuGlobalValueInfo.pVmxVmcsRegion);
+    //使用vmclear清空
+    
+    Asm_VmClear(g_CpuGlobalValueInfo.pVmxVmcsRegionPA.LowPart, g_CpuGlobalValueInfo.pVmxVmcsRegionPA.HighPart);
+    //使用vmptrld装载.
+    *((PULONG)&flags) = Asm_GetEflags();
+    if (flags.CF != 0 && flags.ZF != 0)
+    {
+        KdPrint(("执行VmClear失败\r\n"));
+        return STATUS_UNSUCCESSFUL;
+    }
+    KdPrint(("使用VmClear成功,设置虚拟机状态为未激活\r\n"));
+    Asm_VmPtrld(g_CpuGlobalValueInfo.pVmxVmcsRegionPA.LowPart, g_CpuGlobalValueInfo.pVmxVmcsRegionPA.HighPart);
+
+    return STATUS_SUCCESS;
+}
+
+/*
+* 这里是按照Intel开发者手册描述的VMCS的数据区组成部分依次填写
+* VMCS数据区有6个组成部分，分别是*
+* 1.客户区状态域（Guest State Area）
+* 2.宿主机状态域（Host State Area）
+* 3.虚拟机执行控制域（VM-Execuction Control Fields）
+* 4.VMEntry行为控制域（VM-Entry Control Fields）
+* 5.VMExit行为控制域（VM-Exit Control Fields）
+* 6.VMExit相关信息域（VM-Exit Information Fields）（只读）
+*/
+
+NTSTATUS NTAPI SetVcms()
+{
+    KdPrint(("开始设置Vmcs \r\n"));
+    //GUEST state
+    //host state
+
+    //vmx control 
+      //3.1 vm 执行控制
+    Asm_VmWrite(PIN_BASED_VM_EXEC_CONTROL, SetControlBitValue(0, IA32_VMX_PINBASED_CTLS));
+    //设置执行控件.
+    Asm_VmWrite(CPU_BASED_VM_EXEC_CONTROL, SetControlBitValue(0, IA32_VMX_PROCBASED_CTLS));
+
+    //vm exit控制
+
+    //vmentry 控制.
+    return STATUS_SUCCESS;
+}
+
+static ULONG SetControlBitValue(ULONG Ctl, ULONG Msr)
+{
+    LARGE_INTEGER lar;
+    lar.QuadPart = Asm_ReadMsr32(Msr);
+    Ctl &= lar.HighPart;
+    Ctl |= lar.LowPart;
+    return Ctl;
+}

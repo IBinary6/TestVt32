@@ -11,3 +11,11 @@ NTSTATUS NTAPI TrunOnVmxOn();
 
 //结束VMX模式.
 NTSTATUS NTAPI TrunOffVmxOff();
+
+//添加VMCS支持.
+NTSTATUS NTAPI VmcsSupport();
+//设置vmcs值.
+NTSTATUS NTAPI SetVcms();
+
+//vmcs中设置控制寄存器的时候设置为不处理.
+static ULONG SetControlBitValue(ULONG Ctl, ULONG Msr);

@@ -1,8 +1,10 @@
 #include "Driver.h"
 #include "VT32.h"
+#include "VTasm32.h"
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegPath)
 {
+    pDriverObj->DriverUnload = DriverUnLoad;
 	/*ULONG iCount = 0;
 	NTSTATUS ntStatus;
 	pDriverObj->DriverUnload = DriverUnLoad;
@@ -25,6 +27,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegPath)
 
 NTSTATUS InitVt()
 {
+    EFLAGS eflags;
     if (!NT_SUCCESS(IsSupportedVmx()))
     {
         return STATUS_UNSUCCESSFUL;
@@ -39,7 +42,22 @@ NTSTATUS InitVt()
         //失败直接释放
         TrunOffVmxOff();
     }
+    
+    VmcsSupport();//启动VMCS支持
+    
+    SetVcms();//设置VMCS
+    Asm_VmLaunch(); //进入虚拟机
+    *(PULONG)&eflags = Asm_GetEflags();
 
+    if (eflags.CF == 1 || eflags.ZF == 1)
+    {
+        KdPrint(("进入虚拟机失败,执行vmLanuch失败,错误代码 = %d \r\n", Asm_VmRead(VM_INSTRUCTION_ERROR)));
+        TrunOffVmxOff();
+        return STATUS_UNSUCCESSFUL;
+    }
+    //如果失败.读取错误码.
+    
     TrunOffVmxOff();
+    
     return TRUE;
 }

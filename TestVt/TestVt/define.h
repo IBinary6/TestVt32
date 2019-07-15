@@ -1,13 +1,22 @@
 #pragma once
 #include "public.h"
+enum MSRREGION
+{
+    IA32_FEATURE_CONTROL = 0x3A,      //检查 Bios 是否支持VT的寄存器.
 
-#define IA32_FEATURE_CONTROL 0x3A
+    IA32_VMX_PINBASED_CTLS = 0x481,    //MSR 481寄存器.表示什么VMCS哪些字段可以设置为0.那些可以设置为1
+    IA32_VMX_PROCBASED_CTLS = 0x482  //Processor-Based VM-Execution Controls
+};
+
+
 #define CR4_VMX_Model        0x2000 //设置CR4寄存器的第14位为1,开启VMX模式.
 
 typedef struct  
 {
-    PVOID VmxOnRegion;   //VMON申请的虚拟地址
+    PVOID VmxOnRegion;                 //VMON申请的虚拟地址
     PHYSICAL_ADDRESS  VmOnxRegionPA; //VMX的物理地址
+    PVOID pVmxVmcsRegion;            //VMCS申请的虚拟地址
+    PHYSICAL_ADDRESS pVmxVmcsRegionPA;//物理地址
    
 }G_CPU,*PG_CPU; //记录全局变量的信息
 
@@ -120,3 +129,10 @@ typedef union
     };
 }CR4_FLAGS, *PCR4_FLAGS;
 
+//VMCS 需要用到的结构
+enum 
+{
+    PIN_BASED_VM_EXEC_CONTROL = 0x4000,  //虚拟机的运行控制域.
+    CPU_BASED_VM_EXEC_CONTROL = 0x4002, //CPU控制域
+    VM_INSTRUCTION_ERROR = 4400
+};

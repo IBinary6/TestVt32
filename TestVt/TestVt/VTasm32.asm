@@ -1,6 +1,4 @@
 
-
-
 ;VT技术需要的汇编
 .686p
 .model flat, stdcall
@@ -22,7 +20,7 @@ Asm_CheckExecuteCpuId32	Proc uses ebx esi edi fn:dword, ret_eax:dword,ret_ebx:dw
         mov	esi, ret_edx
         mov	dword ptr [esi], edx
         ret
-Asm_CheckExecuteCpuId32 	Endp
+Asm_CheckExecuteCpuId32 	endp
 
 ;读取MSR寄存器. MSR在inter以后都成为MSR了.
 
@@ -67,5 +65,44 @@ Asm_ReadCr0 proc
     mov eax,cr0
     ret
 Asm_ReadCr0 endp
+
+
+Asm_VmLaunch proc 
+    vmlaunch
+    ret
+Asm_VmLaunch endp
+
+
+Asm_VmRead proc uses ecx Filead:dword   
+     mov eax,Filead
+     vmread ecx,eax
+     mov eax,ecx
+     ret
+Asm_VmRead endp
+
+Asm_VmWrite proc uses ecx Field:dword,Value:dword
+    mov eax,Field
+    mov ecx,Value
+    vmwrite eax,ecx
+    ret
+Asm_VmWrite endp
+
+
+Asm_VmClear proc LowPtr:dword, HightPtr:dword
+    push HightPtr
+    push LowPtr
+    vmclear qword ptr [esp]
+    add esp,8
+    ret
+Asm_VmClear endp
+
+Asm_VmPtrld proc LowPtr:dword,HightPtr:dword
+    push HightPtr
+    push LowPtr
+    vmptrld qword ptr[esp]
+    add esp,8
+    ret
+Asm_VmPtrld endp
+
 
 end
