@@ -104,5 +104,90 @@ Asm_VmPtrld proc LowPtr:dword,HightPtr:dword
     ret
 Asm_VmPtrld endp
 
+Asm_GetCr0 proc
+    mov eax,cr0
+    ret
+Asm_GetCr0 endp
 
+Asm_GetCr3 proc
+    mov eax,cr3
+    ret
+Asm_GetCr3 endp
+;CS SS DS ES FS GS TR
+Asm_GetCs PROC
+    xor eax,eax
+    mov ax,cs
+    ret
+Asm_GetCs endp
+
+Asm_GetSs PROC
+    xor eax,eax
+    mov ax,ss
+    ret
+Asm_GetSs endp
+
+Asm_GetDs proc
+    xor eax,eax
+    mov ax,ds
+    ret
+Asm_GetDs endp
+
+Asm_GetEs proc
+    xor eax,eax
+    mov ax,es
+    ret
+Asm_GetEs endp
+; fs gs tr
+
+Asm_GetFs proc
+    xor eax,eax
+    mov ax,fs
+    ret
+Asm_GetFs endp
+
+Asm_GetGs proc
+    xor eax,eax
+    mov ax,gs
+    ret
+Asm_GetGs endp
+
+Asm_GetTr proc
+    xor eax,eax
+    str ax
+    ret
+Asm_GetTr endp
+
+Asm_GetLdtr proc
+    xor eax,eax
+    sldt ax
+    ret
+Asm_GetLdtr endp
+
+Asm_GetGdtrBase proc
+    local gdtr[6]:byte
+    sgdt  gdtr
+    mov eax,dword ptr gdtr[2]
+    ret
+Asm_GetGdtrBase endp
+ 
+Asm_GetIdtBase proc
+    local idtr[6]:byte
+    sidt  idtr
+    mov eax,dword ptr idtr[2]
+    ret
+Asm_GetIdtBase endp
+;HostÈë¿Ú
+
+HostVmEntry proc
+  int 3
+  int 3
+  int 3
+  int 3
+  int 3
+  mov eax,eax
+  mov ebx,ebx
+  mov ecx,ecx
+  mov edx,edx
+  ret
+HostVmEntry endp
 end

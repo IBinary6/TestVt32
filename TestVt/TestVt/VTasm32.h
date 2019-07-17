@@ -38,4 +38,34 @@ VOID __stdcall  Asm_VmWrite(ULONG Field, ULONG Value);
 //进入虚拟机
 VOID __stdcall Asm_VmLaunch();
 
+ULONG __stdcall Asm_GetCr0();
+
+ULONG __stdcall Asm_GetCr3();
+
+//获取各种段寄存器信息
+
+USHORT __stdcall Asm_GetCs();
+
+
+USHORT __stdcall Asm_GetSs();
+
+
+USHORT __stdcall Asm_GetDs();
+
+USHORT __stdcall Asm_GetEs();
+
+
+USHORT __stdcall Asm_GetFs();
+
+USHORT __stdcall Asm_GetGs();
+
+USHORT __stdcall Asm_GetTr();
+
+USHORT __stdcall Asm_GetLdtr();
+
+
+
+ULONG __stdcall Asm_GetGdtrBase();
+
+ULONG __stdcall Asm_GetIdtBase();
 
